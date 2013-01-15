@@ -25,9 +25,9 @@ if(!is_numeric($arg1) || !is_numeric($arg2))
     error('Non-numeric args');
 
 switch($_GET['op']) {
-    case 'add': result($arg1 + $arg2); break;
-    case 'sub': result($arg1 - $arg2); break;
-    case 'mul': result($arg1 * $arg2); break;
-    case 'div': result($arg1 / $arg2); break;
+    case '+': result($arg1 + $arg2); break;
+    case '-': result($arg1 - $arg2); break;
+    case '*': result($arg1 * $arg2); break;
+    case '/': result($arg1 / $arg2); break;
     default: error('Invalid operator'); break;
 }
