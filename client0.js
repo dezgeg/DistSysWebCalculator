@@ -9,19 +9,18 @@ jQuery(function($) {
         list.append(entry);
     }
 
-    function calculate(params, onSuccess) {
-        return $.getJSON('server.php', params, function(data) {
-            if(!data || data.error || !data.result) {
-                alert('Sorry, error! See console for details.');
-                console.log('Error:', data.error);
-                return;
-            }
-            var calculation = {};
-            for(k in params)
-                calculation[k] = params[k];
-            calculation.result = data.result;
-            onSuccess(calculation);
-        });
+    function calculate(params) {
+        var result = $.ajax('server.php', { async: false, data: params });
+        if(result.status != 200)
+            throw new Error('Network error: ' + result.status +
+                ' - ' + result.statusText);
+        var resultJSON = JSON.parse(result.responseText);
+
+        var calculation = {};
+        for(k in params)
+            calculation[k] = params[k];
+        calculation.result = resultJSON.result;
+        return calculation;
     }
 
     function onFormSubmit(e) {
@@ -37,12 +36,10 @@ jQuery(function($) {
             return false;
         }
 
-        calculate(params, function(calc) {
-            history.push(calc);
-            addToHistoryView(calc);
-            window.localStorage.calcHistory = JSON.stringify(history);
-        });
-        return;
+        var calc = calculate(params);
+        history.push(calc);
+        addToHistoryView(calc);
+        window.localStorage.calcHistory = JSON.stringify(history);
     }
 
     function init() {
