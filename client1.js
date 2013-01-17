@@ -1,54 +1,93 @@
 jQuery(function($) {
-    var numberRx = new RegExp('^( *' +
-        '(?:[+-]?'          + // optional sign, then either
+    var closeParenRx = /^( *\))/;
+    var numberOrParenRx = new RegExp('^( *(?:' +
+        '\\(|(?:[+-]?'          + // optional sign, then either
             '(?:(?:\\d*\\.\\d*)|'  + // fractional part, or...
             '(?:\\d+)))'           + // integer part,
-        '(?:[eE][+-]?\\d+)? *)'); // then finally optional exponent
+        '(?:[eE][+-]?\\d+)? *))'); // then finally optional exponent
     var operatorRx = /^([-+*\/])/;
 
-    function parseExpr(str) {
+    function parseExpr(str, isRecursive) {
         str = str.trim();
 
-        var numbers = [];
-        var ops = [];
-        var expectNumber = true; // expression must be alternative numbers & ops
+        // convert expression to RPN
+        var rpn = [];
+        var previousOp = null; // previous operator, to be pushed to rpn
+                               // after the next number
+        var expectNumber = true; // parser state machine; expression 
+                                 // is alternate numbers & operators
         while(str.length > 0) {
-            var rx = expectNumber ? numberRx : operatorRx;
-            if(!rx.test(str))
+            var rx = expectNumber ? numberOrParenRx : operatorRx;
+
+            // Is the next token invalid?
+            if(!rx.test(str)) {
+                // If called recursively, ')' is valid and ends the expression
+                if (isRecursive && closeParenRx.test(str))
+                    return [rpn, str.substring(RegExp.$1.length)];
+
+                // Otherwise, error.
                 return null;
-            if(expectNumber)
-                numbers.push(Number(RegExp.$1));
-            else
-                ops.push(RegExp.$1);
+            }
             str = str.substring(RegExp.$1.length);
+
+            if(!expectNumber) {
+                previousOp = RegExp.$1;
+            } else {
+                if(RegExp.$1.indexOf('(') == -1) {
+                    rpn.push(Number(RegExp.$1));
+                } else {
+                    // If '(', recursively parse until next ')'...
+                    var parenResult = parseExpr(str, true);
+                    if(!parenResult)
+                        return null;
+
+                    // Merge the rpn expressions and continue normally
+                    rpn = rpn.concat(parenResult[0]);
+                    str = parenResult[1];
+                }
+
+                // Infix -> RPN conversion:
+                if(previousOp)
+                    rpn.push(previousOp);
+            }
             expectNumber = !expectNumber;
         }
         if(expectNumber)
             return null; // ended in an operator
-        return [numbers, ops];
+        return [rpn, str];
     }
 
     function evalExpr(e) {
-        var temp = parseExpr(e),
-            numbers = temp[0],
-            ops = temp[1];
+        var temp = parseExpr(e, false);
+        if(!temp)
+            return null;
+        var rpn = temp[0];
 
-        var acc = numbers[0];
-        for(var i = 0; i < ops.length; i++) {
-            acc = calculateWithHistory({
-                arg1: acc,
-                arg2: numbers[i + 1],
-                op: ops[i],
-            }).result;
+        var stack = [];
+        for(var i = 0; i < rpn.length; i++) {
+            if(typeof(rpn[i]) === 'number') {
+                stack.push(rpn[i]);
+            } else {
+                var arg2 = stack.pop();
+                var arg1 = stack.pop();
+                var result = calculateWithHistory({
+                    arg1: arg1,
+                    arg2: arg2,
+                    op: rpn[i],
+                }).result;
+                stack.push(result);
+            }
         }
-        return acc;
+        return stack[0];
     }
 
     function onFormSubmit(e) {
         e.preventDefault();
         var form = this;
         var expr = $(form).children('[name=expr]').val();
-        evalExpr(expr);
+        if(!evalExpr(expr)) {
+            alert("Not a valid expression!");
+        }
         return false;
     }
 
