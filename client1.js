@@ -1,14 +1,23 @@
 jQuery(function($) {
+    var openParenRx = /^ *\(/;
     var closeParenRx = /^ *\)/;
-    var numberOrParenRx = new RegExp('^ *(?:' +
-        '\\(|(?:[+-]?'          + // optional sign, then either
+    var numberRx = new RegExp('^ *' +
+        '(?:[+-]?'          + // optional sign, then either
             '(?:(?:\\d*\\.\\d*)|'  + // fractional part, or...
             '(?:\\d+)))'           + // integer part,
-        '(?:[eE][+-]?\\d+)? *)'); // then finally optional exponent
+        '(?:[eE][+-]?\\d+)? *'); // then finally optional exponent
     var operatorRx = /^[-+*\/]/;
 
     function parseExpr(str, isRecursive) {
         str = str.trim();
+
+        function matches(rx) {
+            if(rx.test(str)) {
+                str = str.substring(RegExp.lastMatch.length);
+                return true;
+            }
+            return false;
+        }
 
         // convert expression to RPN
         var rpn = [];
@@ -17,31 +26,25 @@ jQuery(function($) {
         var expectOperator = false; // parser state machine; expression 
                                     // is alternate numbers & operators
         while(str.length > 0) {
-            var rx = expectOperator ? operatorRx : numberOrParenRx;
-
-            // Is the next token invalid?
-            if(!rx.test(str)) {
-                // If called recursively, ')' is valid and ends the expression
-                if (isRecursive && closeParenRx.test(str))
-                    return [rpn, str.substring(RegExp.lastMatch.length)];
-
-                // Otherwise, error.
-                throw new Error("Unexpected characters near '" + str + "'");
-            }
-            str = str.substring(RegExp.lastMatch.length);
 
             if(expectOperator) {
+                if (isRecursive && matches(closeParenRx))
+                    return [rpn, str];
+                if(!matches(operatorRx))
+                    throw new Error("Unexpected junk near '" + str + "'");
                 previousOp = RegExp.lastMatch;
             } else {
-                if(RegExp.lastMatch.indexOf('(') == -1) {
+                if(matches(numberRx)) {
                     rpn.push(Number(RegExp.lastMatch));
-                } else {
+                } else if(matches(openParenRx)) {
                     // If '(', recursively parse until next ')'...
                     var parenResult = parseExpr(str, true);
 
                     // Merge the rpn expressions and continue normally
                     rpn = rpn.concat(parenResult[0]);
                     str = parenResult[1];
+                } else {
+                    throw new Error("Unexpected junk near '" + str + "'");
                 }
 
                 // Infix -> RPN conversion:
