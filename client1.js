@@ -1,11 +1,11 @@
 jQuery(function($) {
-    var closeParenRx = /^( *\))/;
-    var numberOrParenRx = new RegExp('^( *(?:' +
+    var closeParenRx = /^ *\)/;
+    var numberOrParenRx = new RegExp('^ *(?:' +
         '\\(|(?:[+-]?'          + // optional sign, then either
             '(?:(?:\\d*\\.\\d*)|'  + // fractional part, or...
             '(?:\\d+)))'           + // integer part,
-        '(?:[eE][+-]?\\d+)? *))'); // then finally optional exponent
-    var operatorRx = /^([-+*\/])/;
+        '(?:[eE][+-]?\\d+)? *)'); // then finally optional exponent
+    var operatorRx = /^[-+*\/]/;
 
     function parseExpr(str, isRecursive) {
         str = str.trim();
@@ -14,32 +14,30 @@ jQuery(function($) {
         var rpn = [];
         var previousOp = null; // previous operator, to be pushed to rpn
                                // after the next number
-        var expectNumber = true; // parser state machine; expression 
-                                 // is alternate numbers & operators
+        var expectOperator = false; // parser state machine; expression 
+                                    // is alternate numbers & operators
         while(str.length > 0) {
-            var rx = expectNumber ? numberOrParenRx : operatorRx;
+            var rx = expectOperator ? operatorRx : numberOrParenRx;
 
             // Is the next token invalid?
             if(!rx.test(str)) {
                 // If called recursively, ')' is valid and ends the expression
                 if (isRecursive && closeParenRx.test(str))
-                    return [rpn, str.substring(RegExp.$1.length)];
+                    return [rpn, str.substring(RegExp.lastMatch.length)];
 
                 // Otherwise, error.
-                return null;
+                throw new Error("Unexpected characters near '" + str + "'");
             }
-            str = str.substring(RegExp.$1.length);
+            str = str.substring(RegExp.lastMatch.length);
 
-            if(!expectNumber) {
-                previousOp = RegExp.$1;
+            if(expectOperator) {
+                previousOp = RegExp.lastMatch;
             } else {
-                if(RegExp.$1.indexOf('(') == -1) {
-                    rpn.push(Number(RegExp.$1));
+                if(RegExp.lastMatch.indexOf('(') == -1) {
+                    rpn.push(Number(RegExp.lastMatch));
                 } else {
                     // If '(', recursively parse until next ')'...
                     var parenResult = parseExpr(str, true);
-                    if(!parenResult)
-                        return null;
 
                     // Merge the rpn expressions and continue normally
                     rpn = rpn.concat(parenResult[0]);
@@ -50,10 +48,10 @@ jQuery(function($) {
                 if(previousOp)
                     rpn.push(previousOp);
             }
-            expectNumber = !expectNumber;
+            expectOperator = !expectOperator;
         }
-        if(expectNumber)
-            return null; // ended in an operator
+        if(!expectOperator)
+            throw new Error("Expression ends in an operator");
         return [rpn, str];
     }
 
@@ -85,8 +83,10 @@ jQuery(function($) {
         e.preventDefault();
         var form = this;
         var expr = $(form).children('[name=expr]').val();
-        if(!evalExpr(expr)) {
-            alert("Not a valid expression!");
+        try {
+            evalExpr(expr);
+        } catch(e) {
+            alert(e);
         }
         return false;
     }
