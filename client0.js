@@ -12,7 +12,7 @@ jQuery(function($) {
             return false;
         }
 
-        doCalculation(params);
+        calculateWithHistory(params);
     }
 
     function init() {

@@ -27,7 +27,7 @@ function calculateOnServer(params) {
     return calculation;
 }
 
-function doCalculation(params) {
+function calculateWithHistory(params) {
     var calc = calculateOnServer(params);
     history.push(calc);
     addToHistoryView(calc);

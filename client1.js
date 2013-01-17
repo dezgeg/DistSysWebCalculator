@@ -1,31 +1,4 @@
 jQuery(function($) {
-    var history;
-
-    function addToHistoryView(calculation) {
-        console.log(calculation);
-    }
-
-    function calculate(params) {
-        var result = $.ajax('server.php', { async: false, data: params });
-        if(result.status != 200)
-            throw new Error('Network error: ' + result.status + ' - ' + result.statusText);
-        var resultJSON = JSON.parse(result.responseText);
-
-        var calculation = {};
-        for(k in params)
-            calculation[k] = params[k];
-        calculation.result = resultJSON.result;
-        return calculation;
-    }
-
-    function calcWithHistory(p) {
-        var calc = calculate(p);
-        history.push(calc);
-        addToHistoryView(calc);
-        window.localStorage.calcHistory = JSON.stringify(history);
-        return calc;
-    }
-
     var numberRx = new RegExp('^( *' +
         '(?:[+-]?'          + // optional sign, then either
             '(?:(?:\\d*\\.\\d*)|'  + // fractional part, or...
@@ -62,7 +35,7 @@ jQuery(function($) {
 
         var acc = numbers[0];
         for(var i = 0; i < ops.length; i++) {
-            acc = calcWithHistory({
+            acc = calculateWithHistory({
                 arg1: acc,
                 arg2: numbers[i + 1],
                 op: ops[i],
@@ -74,15 +47,13 @@ jQuery(function($) {
     function onFormSubmit(e) {
         e.preventDefault();
         var form = this;
-        var expr = evalExpr($(form).children('[name=expr]').val());
-
-        console.log(expr);
+        var expr = $(form).children('[name=expr]').val();
+        evalExpr(expr);
         return false;
     }
 
     function init() {
-        history = JSON.parse(window.localStorage.calcHistory || '[]');
-        $.each(history, function(i, calc) { addToHistoryView(calc); });
+        initHistory();
         $('#mainForm').on('submit', onFormSubmit);
     }
     init();
