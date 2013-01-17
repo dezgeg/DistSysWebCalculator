@@ -2,7 +2,11 @@ jQuery(function($) {
     var history;
 
     function addToHistoryView(calculation) {
-        console.log(calculation);
+        var list = $('#calculationResults');
+        var entry = $('<div>');
+        entry.text("" + calculation.arg1 + " " + calculation.op +
+            " " + calculation.arg2 + " = " + calculation.result);
+        list.append(entry);
     }
 
     function calculate(params, onSuccess) {
