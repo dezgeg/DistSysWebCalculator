@@ -1,13 +1,14 @@
 jQuery(function($) {
-    var funcOrOpenParenRx = /^ *(sin|cos|) *\(/;
-    var closeParenRx = /^ *\)/;
-    var numberRx = new RegExp('^ *' +
-        '(?:[+-]?'          + // optional sign, then either
-            '(?:(?:\\d*\\.\\d*)|'  + // fractional part, or...
-            '(?:\\d+)))'           + // integer part,
-        '(?:[eE][+-]?\\d+)? *'); // then finally optional exponent
-    var variableRx = /^ *x */;
+    var funcOrOpenParenRx = /^(sin|cos|) *\(/;
+    var closeParenRx = /^\)/;
+    var numberRx = new RegExp('^' +
+        '[+-]?(?:'                + // optional sign, then either
+            '(?:\\d*\\.\\d*)|'    + // fractional part, or...
+            '\\d+)'               + // integer part,
+        '(?:[eE][+-]?\\d+)?');      // then finally optional exponent
+    var variableRx = /^x/;
     var operatorRx = /^[-+*\/]/;
+    var whiteSpaceRx = /^[ \t]+/;
 
     function parseExpr(str, isRecursive) {
         str = str.trim();
@@ -27,6 +28,9 @@ jQuery(function($) {
         var expectOperator = false; // parser state machine; expression 
                                     // is alternate numbers & operators
         while(str.length > 0) {
+
+            if(matches(whiteSpaceRx))
+                continue;
 
             if(expectOperator) {
                 if (isRecursive && matches(closeParenRx))
@@ -59,6 +63,10 @@ jQuery(function($) {
             }
             expectOperator = !expectOperator;
         }
+
+        if(isRecursive)
+            throw new Error("Too few )'s");
+
         if(!expectOperator)
             throw new Error("Expression ends in an operator");
         return [rpn, str];
