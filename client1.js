@@ -6,7 +6,7 @@ jQuery(function($) {
             '(?:(?:\\d*\\.\\d*)|'  + // fractional part, or...
             '(?:\\d+)))'           + // integer part,
         '(?:[eE][+-]?\\d+)? *'); // then finally optional exponent
-    var variableRx = /^ *x/;
+    var variableRx = /^ *x */;
     var operatorRx = /^[-+*\/]/;
 
     function parseExpr(str, isRecursive) {
@@ -93,8 +93,6 @@ jQuery(function($) {
 
     function evalExpr(e, x) {
         var temp = parseExpr(e, false);
-        if(!temp)
-            return null;
         var rpn = temp[0];
 
         var stack = [];
@@ -119,8 +117,9 @@ jQuery(function($) {
         return stack[0];
     }
 
+    // Plotting stuff
     var plot = {
-        STEP: 0.01, // 3.14159265359
+        STEP: 0.01,
         XMIN: -3.2,
         XMAX: 3.2,
         YMIN: -1.2,
@@ -129,37 +128,34 @@ jQuery(function($) {
         TICK_SIZE: 2,
         TICK_SIZE_LONG: 3,
     };
+    // convert to pixel coords
+    function xPx(x) {
+        return Math.round((x - plot.XMIN - plot.STEP / 2) / plot.STEP);
+    }
+    function yPx(y) {
+        return Math.round((y - plot.YMIN - plot.STEP / 2) / plot.STEP);
+    }
+    // draw a line in pixel coords
+    function line(ctx, sx, sy, ex, ey) {
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+    }
 
-    function plotExpr(rpn) {
-        var canvas = $('#graph')[0];
+    function initCanvas(canvas) {
         var ctx = canvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
         // also clears
         canvas.width = Math.round((plot.XMAX - plot.XMIN) / plot.STEP) + 1;
         canvas.height = Math.round((plot.YMAX - plot.YMIN) / plot.STEP) + 1;
-        console.log(canvas.width, canvas.height);
         ctx.fillStyle = '#000000';
 
-        var half = plot.STEP / 2;
-        // convert to pixel coords
-        function xPx(x) {
-            return Math.round((x - plot.XMIN - half) / plot.STEP);
-        }
-        function yPx(y) {
-            return Math.round((y - plot.YMIN - half) / plot.STEP);
-        }
-        function line(sx, sy, ex, ey) {
-            ctx.beginPath();
-            ctx.moveTo(sx, sy);
-            ctx.lineTo(ex, ey);
-            ctx.stroke();
-        }
         var originXpx = xPx(0.0), originYpx = yPx(0.0);
-        console.log(originXpx, originYpx);
         // axes
-        line(0, originYpx, canvas.width, originYpx);
-        line(originXpx, 0, originXpx, canvas.height);
-        // x ticks
+        line(ctx, 0, originYpx, canvas.width, originYpx);
+        line(ctx, originXpx, 0, originXpx, canvas.height);
+        // x,y ticks
         for(var i = 1; ; i++) {
             var c = plot.TICK * i;
             if (c > plot.XMAX && c > plot.YMIN)
@@ -167,10 +163,32 @@ jQuery(function($) {
 
             var w = (i % 5) != 0 ? plot.TICK_SIZE : plot.TICK_SIZE_LONG;
 
-            line(xPx(c), originYpx - w, xPx(c), originYpx + w);
-            line(xPx(-c), originYpx - w, xPx(-c), originYpx + w);
-            line(originXpx - w, yPx(c), originXpx + w, yPx(c));
-            line(originXpx - w, yPx(-c), originXpx + w, yPx(-c));
+            line(ctx, xPx(c), originYpx - w, xPx(c), originYpx + w);
+            line(ctx, xPx(-c), originYpx - w, xPx(-c), originYpx + w);
+            line(ctx, originXpx - w, yPx(c), originXpx + w, yPx(c));
+            line(ctx, originXpx - w, yPx(-c), originXpx + w, yPx(-c));
+        }
+    }
+
+    function plotExpr(expr) {
+        var temp = parseExpr(expr, false);
+        var rpn = temp[0];
+
+        var canvas = $('#graph')[0];
+        var ctx = canvas.getContext('2d');
+        initCanvas(canvas);
+
+        ctx.fillStyle = '#ff0000';
+        for (var i = 0; ; i++) {
+            var x = plot.XMIN + i * plot.STEP;
+            if (x > plot.XMAX)
+                break;
+
+            var y = evalExpr(expr, x);
+            console.log(x, y);
+            // canvas axis is upside down from math axis
+            console.log(xPx(x), canvas.height - yPx(y), 1, 1);
+            ctx.fillRect(xPx(x), canvas.height - yPx(y), 1, 1);
         }
     }
 
@@ -194,5 +212,4 @@ jQuery(function($) {
         $('#mainForm').on('submit', onFormSubmit);
     }
     init();
-    plotExpr();
 });
