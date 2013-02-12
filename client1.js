@@ -104,21 +104,21 @@ jQuery(function($) {
 
     // Plotting stuff
     var plot = {
-        STEP: 0.01,
+        STEP: 0.05,
         XMIN: -3.2,
         XMAX: 3.2,
         YMIN: -1.2,
         YMAX: 1.2,
-        TICK: 0.2,
+        TICK: 0.5,
         TICK_SIZE: 2,
         TICK_SIZE_LONG: 3,
     };
     // convert to pixel coords
     function xPx(x) {
-        return Math.round((x - plot.XMIN - plot.STEP / 2) / plot.STEP);
+        return Math.round((x - plot.XMIN) / plot.STEP);
     }
     function yPx(y) {
-        return Math.round((y - plot.YMIN - plot.STEP / 2) / plot.STEP);
+        return Math.round((y - plot.YMIN) / plot.STEP);
     }
     // draw a line in pixel coords
     function line(ctx, sx, sy, ex, ey) {
@@ -135,6 +135,9 @@ jQuery(function($) {
         canvas.width = Math.round((plot.XMAX - plot.XMIN) / plot.STEP) + 1;
         canvas.height = Math.round((plot.YMAX - plot.YMIN) / plot.STEP) + 1;
         ctx.fillStyle = '#000000';
+        ctx.lineWidth = 1.0;
+        // fixes ugly anti-aliasing problems
+        ctx.translate(0.5, 0.5);
 
         var originXpx = xPx(0.0), originYpx = yPx(0.0);
         // axes
@@ -161,15 +164,19 @@ jQuery(function($) {
         initCanvas(canvas);
 
         ctx.fillStyle = '#ff0000';
-        for (var i = 0; ; i++) {
+        var pixelFunc = function(i) {
             var x = plot.XMIN + i * plot.STEP;
             if (x > plot.XMAX)
-                break;
+                return;
 
             var y = evalExpr(rpn, x);
             // canvas axis is upside down from math axis
             ctx.fillRect(xPx(x), canvas.height - yPx(y), 1, 1);
+
+            // avoid totally clogging the browser... should use web workers here.
+            setTimeout(function() { pixelFunc(i + 1); }, 0);
         }
+        setTimeout(function() { pixelFunc(0); }, 0);
     }
 
     function onFormSubmit(e) {
