@@ -27,11 +27,18 @@ function calculateOnServer(params) {
     return calculation;
 }
 
-function calculateWithHistory(params) {
-    var calc = calculateOnServer(params);
-    history.push(calc);
-    addToHistoryView(calc);
-    window.localStorage.calcHistory = JSON.stringify(history);
-    return calc;
+function calc(a, op, b, withHistory) {
+    var params = {
+        arg1: a,
+        arg2: b,
+        op: op,
+    };
+    var calculation = calculateOnServer(params);
+    history.push(calculation);
+    if (withHistory) {
+        addToHistoryView(calculation);
+        window.localStorage.calcHistory = JSON.stringify(history);
+    }
+    return calculation.result;
 }
 

@@ -64,14 +64,6 @@ jQuery(function($) {
         return [rpn, str];
     }
 
-    function calc(a, op, b) {
-        return calculateWithHistory({
-            arg1: a,
-            arg2: b,
-            op: op,
-        }).result;
-    }
-
     function calcSin(x) {
         // Use Taylor approximation x - x^3/3! + x^5/5! - x^7/7!
         var x_2 = calc(x, '*', x);
@@ -91,10 +83,7 @@ jQuery(function($) {
         return acc;
     }
 
-    function evalExpr(e, x) {
-        var temp = parseExpr(e, false);
-        var rpn = temp[0];
-
+    function evalExpr(rpn, x, withHistory) {
         var stack = [];
         for(var i = 0; i < rpn.length; i++) {
             if(typeof(rpn[i]) === 'number') {
@@ -106,11 +95,7 @@ jQuery(function($) {
             } else {
                 var arg2 = stack.pop();
                 var arg1 = stack.pop();
-                var result = calculateWithHistory({
-                    arg1: arg1,
-                    arg2: arg2,
-                    op: rpn[i],
-                }).result;
+                var result = calc(arg1, rpn[i], arg2, withHistory);
                 stack.push(result);
             }
         }
@@ -170,10 +155,7 @@ jQuery(function($) {
         }
     }
 
-    function plotExpr(expr) {
-        var temp = parseExpr(expr, false);
-        var rpn = temp[0];
-
+    function plotExpr(rpn) {
         var canvas = $('#graph')[0];
         var ctx = canvas.getContext('2d');
         initCanvas(canvas);
@@ -184,10 +166,8 @@ jQuery(function($) {
             if (x > plot.XMAX)
                 break;
 
-            var y = evalExpr(expr, x);
-            console.log(x, y);
+            var y = evalExpr(rpn, x);
             // canvas axis is upside down from math axis
-            console.log(xPx(x), canvas.height - yPx(y), 1, 1);
             ctx.fillRect(xPx(x), canvas.height - yPx(y), 1, 1);
         }
     }
@@ -197,10 +177,12 @@ jQuery(function($) {
         var form = this;
         var expr = $(form).children('[name=expr]').val();
         try {
+            var rpn = parseExpr(expr, false)[0];
+
             if (expr.indexOf('x') == -1)
-                evalExpr(expr);
+                evalExpr(rpn, undefined, true);
             else
-                plotExpr(expr);
+                plotExpr(rpn);
         } catch(e) {
             alert(e);
         }
