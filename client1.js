@@ -1,77 +1,4 @@
 jQuery(function($) {
-    var funcOrOpenParenRx = /^(sin|cos|) *\(/;
-    var closeParenRx = /^\)/;
-    var numberRx = new RegExp('^' +
-        '[+-]?(?:'                + // optional sign, then either
-            '(?:\\d*\\.\\d*)|'    + // fractional part, or...
-            '\\d+)'               + // integer part,
-        '(?:[eE][+-]?\\d+)?');      // then finally optional exponent
-    var variableRx = /^x/;
-    var operatorRx = /^[-+*\/]/;
-    var whiteSpaceRx = /^[ \t]+/;
-
-    function parseExpr(str, isRecursive) {
-        str = str.trim();
-
-        function matches(rx) {
-            if(rx.test(str)) {
-                str = str.substring(RegExp.lastMatch.length);
-                return true;
-            }
-            return false;
-        }
-
-        // convert expression to RPN
-        var rpn = [];
-        var previousOp = null; // previous operator, to be pushed to rpn
-                               // after the next number
-        var expectOperator = false; // parser state machine; expression 
-                                    // is alternate numbers & operators
-        while(str.length > 0) {
-
-            if(matches(whiteSpaceRx))
-                continue;
-
-            if(expectOperator) {
-                if (isRecursive && matches(closeParenRx))
-                    return [rpn, str];
-                if(!matches(operatorRx))
-                    throw new Error("Unexpected junk near '" + str + "'");
-                previousOp = RegExp.lastMatch;
-            } else {
-                if(matches(numberRx)) {
-                    rpn.push(Number(RegExp.lastMatch));
-                } else if(matches(variableRx)) {
-                    rpn.push('x');
-                } else if(matches(funcOrOpenParenRx)) {
-                    // If '(' or 'func(', recursively parse until next ')'...
-                    var func = RegExp.$1;
-                    var parenResult = parseExpr(str, true);
-
-                    // Merge the rpn expressions and continue normally
-                    rpn = rpn.concat(parenResult[0]);
-                    str = parenResult[1];
-                    if(func.length > 1)
-                        rpn.push(func);
-                } else {
-                    throw new Error("Unexpected junk near '" + str + "'");
-                }
-
-                // Infix -> RPN conversion:
-                if(previousOp)
-                    rpn.push(previousOp);
-            }
-            expectOperator = !expectOperator;
-        }
-
-        if(isRecursive)
-            throw new Error("Too few )'s");
-
-        if(!expectOperator)
-            throw new Error("Expression ends in an operator");
-        return [rpn, str];
-    }
-
     function calcSin(x) {
         // Use Taylor approximation x - x^3/3! + x^5/5! - x^7/7!
         var x_2 = calc(x, '*', x);
@@ -192,7 +119,7 @@ jQuery(function($) {
         var form = this;
         var expr = $(form).children('[name=expr]').val();
         try {
-            var rpn = parseExpr(expr, false)[0];
+            var rpn = parser.parse(expr, false)[0];
 
             if (expr.indexOf('x') == -1)
                 evalExpr(rpn, undefined, true);
