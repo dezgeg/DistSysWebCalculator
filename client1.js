@@ -9,7 +9,7 @@ jQuery(function($) {
             if (expr.indexOf('x') == -1)
                 evalExpr(rpn, undefined, true);
             else
-                plotExpr(rpn);
+                plot.plotExpr(rpn);
         } catch(e) {
             alert(e);
         }
@@ -18,6 +18,7 @@ jQuery(function($) {
 
     function init() {
         history.initHistory();
+        plot.initPlot();
         $('#mainForm').on('submit', onFormSubmit);
     }
     init();

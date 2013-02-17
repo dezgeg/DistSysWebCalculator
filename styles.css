@@ -1,0 +1,13 @@
+#graphDialog {
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: lightgray;
+    border: 2px solid black;
+}
+#graphDialog, #graph {
+    white-space: nowrap;
+    padding: 0px;
+    margin: 0 auto;
+}

@@ -23,12 +23,17 @@ var drawLine = function(ctx, sx, sy, ex, ey) {
     ctx.stroke();
 }
 
-function initCanvas(canvas) {
+var initCanvas = function(canvas) {
     var ctx = canvas.getContext('2d');
     ctx.fillStyle = '#ffffff';
-    // also clears
+
+    // Set canvas & dialog size (since div fitting to its contents seems not to work)
+    // Also clears the canvas.
     canvas.width = Math.round((plotConfig.XMAX - plotConfig.XMIN) / plotConfig.STEP) + 1;
     canvas.height = Math.round((plotConfig.YMAX - plotConfig.YMIN) / plotConfig.STEP) + 1;
+    plot.dialog.height(canvas.height);
+    plot.dialog.width(canvas.width);
+
     ctx.fillStyle = '#000000';
     ctx.lineWidth = 1.0;
     // fixes ugly anti-aliasing problems
@@ -38,7 +43,7 @@ function initCanvas(canvas) {
     // axes
     drawLine(ctx, 0, originYpx, canvas.width, originYpx);
     drawLine(ctx, originXpx, 0, originXpx, canvas.height);
-    // x,y ticks
+    // axis ticks
     for(var i = 1; ; i++) {
         var c = plotConfig.TICK * i;
         if (c > plotConfig.XMAX && c > plotConfig.YMIN)
@@ -46,30 +51,43 @@ function initCanvas(canvas) {
 
         var w = (i % 5) != 0 ? plotConfig.TICK_SIZE : plotConfig.TICK_SIZE_LONG;
 
-        drawLine(ctx, xPx(c), originYpx - w, xPx(c), originYpx + w);
-        drawLine(ctx, xPx(-c), originYpx - w, xPx(-c), originYpx + w);
-        drawLine(ctx, originXpx - w, yPx(c), originXpx + w, yPx(c));
-        drawLine(ctx, originXpx - w, yPx(-c), originXpx + w, yPx(-c));
+        drawLine(ctx, xPx(c), originYpx - w, xPx(c), originYpx + w);    // positive x-axis
+        drawLine(ctx, xPx(-c), originYpx - w, xPx(-c), originYpx + w);  // negative x-axis
+        drawLine(ctx, originXpx - w, yPx(c), originXpx + w, yPx(c));    // negative y-axis
+        drawLine(ctx, originXpx - w, yPx(-c), originXpx + w, yPx(-c));  // positive y-axis
     }
+
+    plot.dialog.show();
 }
 
-function plotExpr(rpn) {
-    var canvas = $('#graph')[0];
-    var ctx = canvas.getContext('2d');
-    initCanvas(canvas);
+plot = {
+    initPlot: function() {
+        plot.dialog = $('#graphDialog');
+        plot.dialog.on('click', function() {
+            plot.dialog.hide();
+        });
+    },
+    plotExpr: function(rpn) {
+        var canvas = $('#graph')[0];
+        var ctx = canvas.getContext('2d');
+        initCanvas(canvas);
 
-    ctx.fillStyle = '#ff0000';
-    var pixelFunc = function(i) {
-        var x = plotConfig.XMIN + i * plotConfig.STEP;
-        if (x > plotConfig.XMAX)
-            return;
+        ctx.fillStyle = '#ff0000';
+        var pixelFunc = function(i) {
+            if (plot.dialog.css('display') === 'none')
+                return;
 
-        var y = evalExpr(rpn, x);
-        // canvas axis is upside down from math axis
-        ctx.fillRect(xPx(x), canvas.height - yPx(y), 1, 1);
+            var x = plotConfig.XMIN + i * plotConfig.STEP;
+            if (x > plotConfig.XMAX)
+                return;
 
-        // avoid totally clogging the browser... should use web workers here.
-        setTimeout(function() { pixelFunc(i + 1); }, 0);
+            var y = evalExpr(rpn, x);
+            // canvas axis is upside down from math axis
+            ctx.fillRect(xPx(x), canvas.height - yPx(y), 1, 1);
+
+            // avoid totally clogging the browser... should use web workers here.
+            setTimeout(function() { pixelFunc(i + 1); }, 0);
+        }
+        setTimeout(function() { pixelFunc(0); }, 0);
     }
-    setTimeout(function() { pixelFunc(0); }, 0);
 }
