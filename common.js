@@ -15,15 +15,17 @@ function initHistory() {
 
 function calculateOnServer(params) {
     var result = $.ajax('server.php', { async: false, data: params });
-    if(result.status != 200)
-        throw new Error('Network error: ' + result.status +
-            ' - ' + result.statusText);
-    var resultJSON = JSON.parse(result.responseText);
+    var text = result.responseText;
+    var resultDouble = parseFloat(result.responseText);
+
+   if (isNaN(resultDouble) && !/^nan$/i.test(result.responseText))
+        throw new Error('Server error: ' + result.status +
+            ': ' + result.statusText + ', ' + result.responseText);
 
     var calculation = {};
     for(k in params)
         calculation[k] = params[k];
-    calculation.result = resultJSON.result;
+    calculation.result = resultDouble;
     return calculation;
 }
 
@@ -34,6 +36,7 @@ function calc(a, op, b, withHistory) {
         op: op,
     };
     var calculation = calculateOnServer(params);
+    calculation.result += ''; // HACK - no infinities or nans in json. THANK YOU
     history.push(calculation);
     if (withHistory) {
         addToHistoryView(calculation);
