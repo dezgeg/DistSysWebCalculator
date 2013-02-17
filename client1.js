@@ -205,7 +205,7 @@ jQuery(function($) {
     }
 
     function init() {
-        initHistory();
+        history.initHistory();
         $('#mainForm').on('submit', onFormSubmit);
     }
     init();
