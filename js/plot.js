@@ -56,13 +56,31 @@ var initCanvas = function(canvas) {
         drawLine(ctx, originXpx - w, yPx(c), originXpx + w, yPx(c));    // negative y-axis
         drawLine(ctx, originXpx - w, yPx(-c), originXpx + w, yPx(-c));  // positive y-axis
     }
+}
 
-    plot.dialog.show();
+var rpnToInfix = function(rpn) {
+    var exprStack = [];
+    for(var i = 0; i < rpn.length; i++) {
+        if(typeof(rpn[i]) === 'number') {
+            exprStack.push(rpn[i]);
+        } else if (rpn[i] == 'x') {
+            exprStack.push('x');
+        } else if (rpn[i] == 'sin' || rpn[i] == 'cos') {
+            exprStack.push(rpn[i] + '(' + exprStack.pop() + ')');
+        } else {
+            var arg2 = exprStack.pop();
+            var arg1 = exprStack.pop();
+            exprStack.push('(' + arg1 + ') ' + rpn[i] + ' (' + arg2 + ')');
+        }
+    }
+    return exprStack[0];
 }
 
 plot = {
     initPlot: function() {
         plot.dialog = $('#graphDialog');
+        plot.canvas = $('#graphDialog canvas');
+        plot.img = $('#graphDialog img');
         plot.dialog.on('click', function() {
             plot.dialog.hide();
         });
@@ -70,10 +88,22 @@ plot = {
     hidePlot: function() {
         plot.dialog.hide();
     },
+    plotImageOnServer: function(rpn) {
+        var infix = rpnToInfix(rpn);
+
+        plot.canvas.hide();
+        plot.img.attr('src', 'server.php?plot=' + encodeURIComponent(infix));
+        plot.img.show();
+        plot.dialog.show();
+    },
     plotToCanvas: function(rpn, calcFn) {
-        var canvas = $('#graph')[0];
+        plot.img.hide();
+        plot.canvas.show();
+
+        var canvas = plot.canvas[0];
         var ctx = canvas.getContext('2d');
         initCanvas(canvas);
+        plot.dialog.show();
 
         ctx.fillStyle = '#ff0000';
         var pixelFunc = function(i) {

@@ -2,6 +2,17 @@
 // ini_set('display_errors', 'on');
 // error_reporting(E_ALL);
 
+$gnuplot_params = implode('; ', array(
+    'set term png size 513,201',
+    'set xrange [-3.2:3.2]',
+    'set yrange [-1.2:1.2]',
+    'set xtics 0.5',
+    'set ytics 0.5',
+    'set zeroaxis',
+    'unset label',
+    'unset key',
+)) . '; ';
+
 function error($msg) {
     die(json_encode($msg));
 }
@@ -47,7 +58,7 @@ if(isset($_GET['plot'])) {
     if (trim($func) === '')
         error('Empty expression');
 
-    $gnuplot_expr = escapeshellarg('set term png; plot ' . $func);
+    $gnuplot_expr = escapeshellarg($gnuplot_params . 'plot ' . $func);
     // validate
     $exit_status = 1;
     $output = array();
