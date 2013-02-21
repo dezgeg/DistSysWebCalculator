@@ -8,8 +8,20 @@
 // onServerWithHistory: like onServer, but also add the operations to the history,
 //                      see js/history.js
 
+// Use Taylor approximation x - x^3/3! + x^5/5! - x^7/7!
 var approximateSin = function(x, calcFn) {
-    // Use Taylor approximation x - x^3/3! + x^5/5! - x^7/7!
+    // Reduce the angle with the identity sin(x + pi) = -sin(x)
+    // to improve the Taylor approximation's accuracy
+    var negate = false;
+    while (isFinite(x) && x > Math.PI) {
+        x = calcFn(x, '-', Math.PI);
+        negate = !negate;
+    }
+    while (isFinite(x) && x < -Math.PI) {
+        x = calcFn(x, '+', Math.PI);
+        negate = !negate;
+    }
+
     var x_2 = calcFn(x, '*', x);
     var x_3 = calcFn(x, '*', x_2);
     var x_5 = calcFn(x_3, '*', x_2);
@@ -23,6 +35,9 @@ var approximateSin = function(x, calcFn) {
     acc = calcFn(acc, '-', calcFn(x_3, '/', f3));
     acc = calcFn(acc, '+', calcFn(x_5, '/', f5));
     acc = calcFn(acc, '-', calcFn(x_7, '/', f7));
+
+    if (negate)
+        acc = calcFn(0, '-', acc);
 
     return acc;
 }
