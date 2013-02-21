@@ -5,12 +5,12 @@ jQuery(function($) {
         var arg1 = parseFloat($(form).children('[name=arg1]').val());
         var arg2 = parseFloat($(form).children('[name=arg2]').val());
         var op   = $(form).children('[name=op]').val();
+
         if(isNaN(arg1) || isNaN(arg2)) {
             alert('Enter valid numbers!');
             return false;
         }
-
-        calc(arg1, op, arg2, true);
+        calculate.onServerWithHistory(arg1, op, arg2);
     }
 
     function init() {
