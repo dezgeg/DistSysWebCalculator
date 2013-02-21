@@ -21,4 +21,9 @@ history = {
             " " + calculation.arg2 + " = " + calculation.result);
         list.append(entry);
     },
+    clearHistory: function() {
+        $('#calculationResults').empty();
+        history.entries = [];
+        localStorage[history.STORAGE_KEY] = JSON.stringify(history.entries);
+    },
 };

@@ -67,6 +67,9 @@ plot = {
             plot.dialog.hide();
         });
     },
+    hidePlot: function() {
+        plot.dialog.hide();
+    },
     plotExpr: function(rpn) {
         var canvas = $('#graph')[0];
         var ctx = canvas.getContext('2d');

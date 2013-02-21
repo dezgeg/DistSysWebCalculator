@@ -3,6 +3,7 @@ jQuery(function($) {
         e.preventDefault();
         var form = this;
         var expr = $(form).children('[name=expr]').val();
+        plot.hidePlot();
         try {
             var rpn = parser.parse(expr, false)[0];
 
@@ -20,6 +21,10 @@ jQuery(function($) {
         history.initHistory();
         plot.initPlot();
         $('#mainForm').on('submit', onFormSubmit);
+        $('#clearHistory').on('click', function(e) {
+                history.clearHistory();
+                e.preventDefault();
+        });
     }
     init();
 });

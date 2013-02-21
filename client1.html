@@ -17,7 +17,15 @@
         <form method="GET" id="mainForm">
             <input type="text" name="expr" />
             <input type="submit" />
+            <button type="button" id="clearHistory">Clear history</button>
+            <br/>
+            Plot mode: <select name="plotType">
+                <option value="plotEverythinOnServer">Plot the whole expression on server</option>
+                <option value="plotTrigLocally">Calculate trig operations on client, invidual elementary on server</option>
+                <option value="plotTrigTaylorApproxLocally">Approximate trig with elementary ops (Taylor series), which are computed on server</option>
+            </select>
         </form>
+        <br/>
         <div id="graphDialog">
             <canvas id="graph" width="100" height="100"></canvas>
         </div>
