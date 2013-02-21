@@ -70,7 +70,7 @@ plot = {
     hidePlot: function() {
         plot.dialog.hide();
     },
-    plotExpr: function(rpn) {
+    plotToCanvas: function(rpn, calcFn) {
         var canvas = $('#graph')[0];
         var ctx = canvas.getContext('2d');
         initCanvas(canvas);
@@ -84,7 +84,7 @@ plot = {
             if (x > plotConfig.XMAX)
                 return;
 
-            var y = evalExpr(rpn, x);
+            var y = eval.evalExpr(rpn, calcFn, x);
             // canvas axis is upside down from math axis
             ctx.fillRect(xPx(x), canvas.height - yPx(y), 1, 1);
 

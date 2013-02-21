@@ -17,8 +17,7 @@ history = {
     addToView: function(calculation) {
         var list = $('#calculationResults');
         var entry = $('<div>');
-        entry.text("" + calculation.arg1 + " " + calculation.op +
-            " " + calculation.arg2 + " = " + calculation.result);
+        entry.text(calculation);
         list.append(entry);
     },
     clearHistory: function() {

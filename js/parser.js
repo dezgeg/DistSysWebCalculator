@@ -9,9 +9,8 @@ var variableRx = /^x/;
 var operatorRx = /^[-+*\/]/;
 var whiteSpaceRx = /^[ \t]+/;
 
-parser = { };
 
-parser.parse = function(str, isRecursive) {
+var parseExprRecursive = function(str, isRecursive) {
     str = str.trim();
 
     function matches(rx) {
@@ -47,7 +46,7 @@ parser.parse = function(str, isRecursive) {
             } else if(matches(funcOrOpenParenRx)) {
                 // If '(' or 'func(', recursively parse until next ')'...
                 var func = RegExp.$1;
-                var parenResult = parser.parse(str, true);
+                var parenResult = parseExprRecursive(str, true);
 
                 // Merge the rpn expressions and continue normally
                 rpn = rpn.concat(parenResult[0]);
@@ -71,5 +70,13 @@ parser.parse = function(str, isRecursive) {
     if(!expectOperator)
         throw new Error("Expression ends in an operator");
     return [rpn, str];
-}
+};
 
+parser = {
+    parse: function(expr) {
+        return parseExprRecursive(expr, false)[0];
+    },
+    isUnaryTrigOp: function(op) {
+        return op == 'sin' || op == 'cos';
+    }
+};

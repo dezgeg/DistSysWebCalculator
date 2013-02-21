@@ -6,10 +6,10 @@
         <link rel="stylesheet" href="styles.css" type="text/css" />
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
         <script type="text/javascript" src="js/history.js"></script>
+        <script type="text/javascript" src="js/calculate.js"></script>
         <script type="text/javascript" src="js/parser.js"></script>
         <script type="text/javascript" src="js/eval.js"></script>
         <script type="text/javascript" src="js/plot.js"></script>
-        <script type="text/javascript" src="common.js"></script>
         <script type="text/javascript" src="client1.js"></script>
     </head>
     <body>
@@ -20,7 +20,7 @@
             <button type="button" id="clearHistory">Clear history</button>
             <br/>
             Plot mode: <select name="plotType">
-                <option value="plotEverythinOnServer">Plot the whole expression on server</option>
+                <option value="plotImageOnServer">Plot the whole expression on server</option>
                 <option value="plotTrigLocally">Calculate trig operations on client, invidual elementary on server</option>
                 <option value="plotTrigTaylorApproxLocally">Approximate trig with elementary ops (Taylor series), which are computed on server</option>
             </select>

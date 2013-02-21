@@ -5,12 +5,23 @@ jQuery(function($) {
         var expr = $(form).children('[name=expr]').val();
         plot.hidePlot();
         try {
-            var rpn = parser.parse(expr, false)[0];
+            var rpn = parser.parse(expr);
 
-            if (expr.indexOf('x') == -1)
-                evalExpr(rpn, undefined, true);
-            else
-                plot.plotExpr(rpn);
+            if (expr.indexOf('x') == -1) {
+                eval.evalExpr(rpn, calculate.onServerWithHistory);
+            } else {
+                switch($('[name=plotType] option:selected').val()) {
+                    case 'plotImageOnServer':
+                        plot.plotImageOnServer(rpn);
+                        break;
+                    case 'plotTrigLocally':
+                        plot.plotToCanvas(rpn, calculate.onServerButTrigLocally);
+                        break;
+                    case 'plotTrigTaylorApproxLocally':
+                        plot.plotToCanvas(rpn, calculate.onServer);
+                        break;
+                }
+            }
         } catch(e) {
             alert(e);
         }
