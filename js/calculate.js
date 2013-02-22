@@ -4,9 +4,9 @@
 //
 // onServer: perform AJAX call for elementary (+,-,*,/) operations,
 //           approximate sin/cos with elementary AJAX operations using taylor series
-// onServerButTrigLocally: like onServer, but calculate sin/cos directly on client side
 // onServerWithHistory: like onServer, but also add the operations to the history,
 //                      see js/history.js
+// locally: calculate everything locally
 
 // Calculate the sine of x with the Taylor series approximation
 // sin(x) = x - x^3/3! + x^5/5! - x^7/7!
@@ -80,11 +80,17 @@ calculate = {
         };
         return doServerAjaxCall(params);
     },
-    // onServerButTrigLocally: like onServer, but calculate sin/cos directly on client side
-    onServerButTrigLocally: function(a, op, b) {
+    // locally: calculate everything locally
+    locally: function(a, op, b) {
         if (parser.isUnaryTrigOp(op))
             return Math[op](a);
-        return calculate.onServer(a, op, b);
+        switch (op) {
+            case '+': return a + b;
+            case '-': return a - b;
+            case '*': return a * b;
+            case '/': return a / b;
+        }
+        throw new Error('Invalid op');
     },
     // onServerWithHistory: like onServer, but also add the operations to the history,
     //                      see js/history.js

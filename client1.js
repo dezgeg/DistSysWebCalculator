@@ -21,8 +21,8 @@ jQuery(function($) {
                     case 'plotImageOnServer':
                         plot.plotImageOnServer(rpn);
                         break;
-                    case 'plotTrigLocally':
-                        plot.plotToCanvas(rpn, calculate.onServerButTrigLocally);
+                    case 'plotLocally':
+                        plot.plotToCanvas(rpn, calculate.locally);
                         break;
                     case 'plotTrigTaylorApproxLocally':
                         plot.plotToCanvas(rpn, calculate.onServer);
