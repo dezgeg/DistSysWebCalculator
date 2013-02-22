@@ -1,3 +1,4 @@
+// // Tuomas Tynkkynen, 013770385
 // window.plot - plotting graphs
 // Implements two methods of plotting a function,
 // to a PNG image with gnuplot on the server (see server.php)

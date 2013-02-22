@@ -1,4 +1,5 @@
 <?php
+// // Tuomas Tynkkynen, 013770385
 // This script either calculates an elementary calculation,
 // or plots a whole graph as a PNG, depending on GET params.
 //

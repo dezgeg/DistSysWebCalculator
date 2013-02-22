@@ -1,3 +1,4 @@
+// // Tuomas Tynkkynen, 013770385
 // window.calculate - Calculation functions: all have signature like
 //      calc(arg1, op, arg2) for binary operations (e.g calc(6, '*', 7) -> 42)
 //      calc(arg, op) for unary operations sin/cos (e.g calc(pi, 'sin') -> 0)

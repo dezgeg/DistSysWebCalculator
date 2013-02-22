@@ -1,3 +1,4 @@
+// // Tuomas Tynkkynen, 013770385
 // window.history - the calculation history, which is stored in the
 // browser's HTML5 localStorage.
 history = {

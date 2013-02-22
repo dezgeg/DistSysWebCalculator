@@ -1,0 +1,56 @@
+Distributed Systems project: Multitier architectures in the Web.
+
+Server side
+===========
+All the server side code is in server.php.
+It either does the calculations, with the GET parameters specified in the spec (arg1, op, arg2),
+or if the 'plot' parameter is given, plots that expression.
+The expression should be a valid gnuplot expression, and if valid,
+a PNG file is directly output.
+
+Simple client
+=============
+Open client0.html for the two input boxes, one combo box-version.
+
+The history is implemented with HTML5 local storage,
+the calculations are stored as strings in an JSONified
+array in the local storage, and displayed as simple
+divs.
+
+Complex client
+==============
+The complex client first parses the expression into RPN (parse() in js/parse.js),
+and then it can be evaluated in that form directly (evalExpr() in js/parse.js).
+It accepts expressions as in the spec, but additionally the sin and cos
+functions can be used in normal calculations too.
+
+The RPN evaluator also takes a calculator function that implements the actual
+calculations. There are three calculation functions (js/calculate.js):
+    - completely local calculation
+    - server-side elementary calculations
+    - server-side calculation, with results added to the calculation history view
+
+The plain calculation uses the last one. Local plotting uses the two first ones.
+For the server calculations, sine is approximated with taylor series for
+the range -pi;pi, and other values are calculated by reducing the
+argument into that range. Cos is implemented with sin.
+
+The plotting can be done on client or on the server.
+Use the combobox to choose.
+Arbitrary expressions can be plotted. (i.e 1 + 1/x)
+Plotting is activated if the variable x occurs in the expression.
+
+Server-side plotting is just gnuplot outputting a PNG image.
+
+The client-side plotter evaluates the RPN expression repeatedly (evalExpr())
+with different values of x, and plots them to a canvas.
+The plotting is done inside a setTimeout callback with a delay of 0,
+to prevent browser death.
+
+Installation
+============
+None, just unpack to a PHP-enabled web server.
+On users at http://tmtynkky.users.cs.helsinki.fi/distsys/
+
+Tuomas Tynkkynen
+013770385

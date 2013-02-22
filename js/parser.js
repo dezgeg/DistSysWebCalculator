@@ -1,3 +1,4 @@
+// // Tuomas Tynkkynen, 013770385
 // This file provides window.parser, which has the following functions
 // related to parsing and evaluating an infix math expression:
 //  - parse(exprString)
