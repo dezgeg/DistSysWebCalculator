@@ -8,7 +8,14 @@ jQuery(function($) {
             var rpn = parser.parse(expr);
 
             if (expr.indexOf('x') == -1) {
-                parser.evalExpr(rpn, calculate.onServerWithHistory);
+                if (rpn.length != 1) {
+                    parser.evalExpr(rpn, calculate.onServerWithHistory);
+                } else {
+                    // If there's nothing to actually calculate,
+                    // evalExpr won't add anything to history.
+                    // So do this manually to make it look not stupid.
+                    history.addCalculation('' + rpn[0]);
+                }
             } else {
                 switch($('[name=plotType] option:selected').val()) {
                     case 'plotImageOnServer':
