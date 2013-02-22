@@ -16,7 +16,7 @@ jQuery(function($) {
 
     function init() {
         $('#mainForm').on('submit', onFormSubmit);
-        history.initHistory();
+        calculationHistory.initHistory();
     }
     init();
 });

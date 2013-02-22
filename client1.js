@@ -15,7 +15,7 @@ jQuery(function($) {
                     // If there's nothing to actually calculate,
                     // evalExpr won't add anything to history.
                     // So do this manually to make it look not stupid.
-                    history.addCalculation('' + rpn[0]);
+                    calculationHistory.addCalculation('' + rpn[0]);
                 }
             } else {
                 switch($('[name=plotType] option:selected').val()) {
@@ -37,11 +37,11 @@ jQuery(function($) {
     }
 
     function init() {
-        history.initHistory();
+        calculationHistory.initHistory();
         plot.initPlot();
         $('#mainForm').on('submit', onFormSubmit);
         $('#clearHistory').on('click', function(e) {
-                history.clearHistory();
+                calculationHistory.clearHistory();
                 e.preventDefault();
         });
     }

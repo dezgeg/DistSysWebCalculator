@@ -5,8 +5,8 @@
 //
 // onServer: perform AJAX call for elementary (+,-,*,/) operations,
 //           approximate sin/cos with elementary AJAX operations using taylor series
-// onServerWithHistory: like onServer, but also add the operations to the history,
-//                      see js/history.js
+// onServerWithHistory: like onServer, but also add the operations to the calculationHistory,
+//                      see js/calculationHistory.js
 // locally: calculate everything locally
 
 // Calculate the sine of x with the Taylor series approximation
@@ -93,14 +93,14 @@ calculate = {
         }
         throw new Error('Invalid op');
     },
-    // onServerWithHistory: like onServer, but also add the operations to the history,
-    //                      see js/history.js
+    // onServerWithHistory: like onServer, but also add the operations to the calculationHistory,
+    //                      see js/calculationHistory.js
     onServerWithHistory: function(a, op, b) {
         var result = calculate.onServer(a, op, b);
         if (parser.isUnaryTrigOp(op))
-            history.addCalculation(op + '(' + a + ') = ' + result);
+            calculationHistory.addCalculation(op + '(' + a + ') = ' + result);
         else
-            history.addCalculation(a + ' ' + op + ' ' + b + ' = ' + result);
+            calculationHistory.addCalculation(a + ' ' + op + ' ' + b + ' = ' + result);
         return result;
     }
 };
