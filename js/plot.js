@@ -102,14 +102,22 @@ plot = {
             plot.dialog.hide();
         });
     },
+    // Stop the asynch canvas plotting, if there is one ongoing
+    stopPlot: function() {
+        if (plot.timeoutId)
+            clearTimeout(plot.timeoutId);
+        plot.timeoutId = undefined;
+    },
     // Hides the plot.
     hidePlot: function() {
+        plot.stopPlot();
         plot.dialog.hide();
     },
     // Plot the RPN expression on the server
     plotImageOnServer: function(rpn) {
         var infix = rpnToInfix(rpn);
 
+        plot.stopPlot();
         plot.canvas.hide();
         plot.img.attr('src', 'server.php?plot=' + encodeURIComponent(infix));
         plot.img.show();
@@ -117,6 +125,7 @@ plot = {
     },
     // Plot the RPN expression locally to a HTML5 canvas
     plotToCanvas: function(rpn, calcFn) {
+        plot.stopPlot();
         plot.img.hide();
         plot.canvas.show();
 
@@ -144,8 +153,8 @@ plot = {
             // canvas axis is upside down from math axis
             ctx.fillRect(xPx(x), canvas.height - yPx(y), 1, 1);
 
-            setTimeout(function() { pixelFunc(i + 1); }, 0);
+            plot.timeoutId = setTimeout(function() { pixelFunc(i + 1); }, 0);
         }
-        setTimeout(function() { pixelFunc(0); }, 0);
+        plot.timeoutId = setTimeout(function() { pixelFunc(0); }, 0);
     }
 }
