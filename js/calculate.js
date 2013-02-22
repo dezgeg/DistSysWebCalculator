@@ -8,7 +8,9 @@
 // onServerWithHistory: like onServer, but also add the operations to the history,
 //                      see js/history.js
 
-// Use Taylor approximation x - x^3/3! + x^5/5! - x^7/7!
+// Calculate the sine of x with the Taylor series approximation
+// sin(x) = x - x^3/3! + x^5/5! - x^7/7!
+// The approximation is calculated with the calculation function calcFn.
 var approximateSin = function(x, calcFn) {
     // Reduce the angle with the identity sin(x + pi) = -sin(x)
     // to improve the Taylor approximation's accuracy
@@ -60,6 +62,8 @@ var doServerAjaxCall = function(params) {
 }
 
 calculate = {
+    // onServer: perform AJAX call for elementary (+,-,*,/) operations,
+    //           approximate sin/cos with elementary AJAX operations using taylor series
     onServer: function(a, op, b) {
         if (op == 'sin') {
             return approximateSin(a, calculate.onServer);
@@ -76,11 +80,14 @@ calculate = {
         };
         return doServerAjaxCall(params);
     },
+    // onServerButTrigLocally: like onServer, but calculate sin/cos directly on client side
     onServerButTrigLocally: function(a, op, b) {
         if (parser.isUnaryTrigOp(op))
             return Math[op](a);
         return calculate.onServer(a, op, b);
     },
+    // onServerWithHistory: like onServer, but also add the operations to the history,
+    //                      see js/history.js
     onServerWithHistory: function(a, op, b) {
         var result = calculate.onServer(a, op, b);
         if (parser.isUnaryTrigOp(op))

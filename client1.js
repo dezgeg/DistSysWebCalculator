@@ -8,7 +8,7 @@ jQuery(function($) {
             var rpn = parser.parse(expr);
 
             if (expr.indexOf('x') == -1) {
-                eval.evalExpr(rpn, calculate.onServerWithHistory);
+                parser.evalExpr(rpn, calculate.onServerWithHistory);
             } else {
                 switch($('[name=plotType] option:selected').val()) {
                     case 'plotImageOnServer':

@@ -1,4 +1,18 @@
 <?php
+// This script either calculates an elementary calculation,
+// or plots a whole graph as a PNG, depending on GET params.
+//
+// If the 'plot' parameter is given, the specified
+// expression is plotted with gnuplot, and a PNG
+// file is output directly.
+//
+// If 'arg1', 'arg2, and 'op' are given, the value of
+//  arg1 <op> arg2 is calculated and output to the page.
+//
+// On errors, a JSON string is outputted.
+
+
+// For debugging
 // ini_set('display_errors', 'on');
 // error_reporting(E_ALL);
 
@@ -17,6 +31,9 @@ function error($msg) {
     die(json_encode($msg));
 }
 
+// Output the calculation result to the page.
+// NaNs and infinities need special treatment
+// or javascript's Number() won't recogize them...
 function result($res) {
     if (is_nan($res))
         echo('NaN');
@@ -26,6 +43,8 @@ function result($res) {
         echo($res);
 }
 
+// Kinda the same as the previous, but into the opposite direction;
+// NaNs and infinities do not convert to PHP numbers from strings properly...
 function really_to_float($str)  {
     switch (strtolower($str)) {
         case '-infinity': return -INF;
@@ -51,7 +70,11 @@ function really_divide($arg1, $arg2) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Code starts here
+
 if(isset($_GET['plot'])) {
+    // We are plotting to a PNG image
+
     $func = $_GET['plot'];
     if (preg_match('#^[-+*/x0-9.eEsincos( )]+$#', $func) !== 1)
         error('Plotted function contains invalid characters');
@@ -59,7 +82,9 @@ if(isset($_GET['plot'])) {
         error('Empty expression');
 
     $gnuplot_expr = escapeshellarg($gnuplot_params . 'plot ' . $func);
-    // validate
+
+    // First, discard all output and just check the exit status to see
+    // if the expression was valid.
     $exit_status = 1;
     $output = array();
     exec('gnuplot 2>&1 1>/dev/null -e ' . $gnuplot_expr, $output, $exit_status);
@@ -73,8 +98,11 @@ if(isset($_GET['plot'])) {
     passthru('gnuplot -e ' . $gnuplot_expr);
 
 } else {
+    // We are calculating an elementary expression
 
+    // To be strict, we don't have valid JSON if the result is Inf/NaN.
     header("Content-type: text/json\r\n");
+
     if(!isset($_GET['arg1']) || !isset($_GET['arg2']) || !isset($_GET['op']))
         error('Invalid GET params.');
 
