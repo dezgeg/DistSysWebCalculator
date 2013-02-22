@@ -94,5 +94,6 @@ calculate = {
             history.addCalculation(op + '(' + a + ') = ' + result);
         else
             history.addCalculation(a + ' ' + op + ' ' + b + ' = ' + result);
+        return result;
     }
 };
