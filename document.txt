@@ -52,5 +52,20 @@ Installation
 None, just unpack to a PHP-enabled web server.
 On users at http://tmtynkky.users.cs.helsinki.fi/distsys/
 
+jQuery is used from the CDN.
+
+Files
+=====
+client0.html        Simple client
+client0.js          Javascript for the previous
+client1.html        Complex client
+client1.js          Javascript for the previous
+js/calculate.js     Elementary calculation functions
+js/history.js       Calculation history implementation
+js/parser.js        Complex expression parser & evaluator
+js/plot.js          Plotting
+styles.css          CSS
+server.php          Server-side code
+
 Tuomas Tynkkynen
 013770385
